@@ -25,7 +25,6 @@
 #
 
 ARG CROSS="false"
-# IMPORTANT: When updating this please note that stdlib archive/tar pkg is vendored
 ARG GO_VERSION=1.12.17
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -87,20 +86,20 @@ RUN set -x \
 	&& go build -o /build/swagger github.com/go-swagger/go-swagger/cmd/swagger \
 	&& rm -rf "$GOPATH"
 
-FROM base AS frozen-images
-ARG DEBIAN_FRONTEND
-RUN apt-get update && apt-get install -y --no-install-recommends \
-	ca-certificates \
-	jq \
-	&& rm -rf /var/lib/apt/lists/*
-# Get useful and necessary Hub images so we can "docker load" locally instead of pulling
-COPY contrib/download-frozen-image-v2.sh /
-RUN /download-frozen-image-v2.sh /build \
-	buildpack-deps:jessie@sha256:dd86dced7c9cd2a724e779730f0a53f93b7ef42228d4344b25ce9a42a1486251 \
-	busybox:latest@sha256:bbc3a03235220b170ba48a157dd097dd1379299370e1ed99ce976df0355d24f0 \
-	busybox:glibc@sha256:0b55a30394294ab23b9afd58fab94e61a923f5834fba7ddbae7f8e0c11ba85e6 \
-	debian:jessie@sha256:287a20c5f73087ab406e6b364833e3fb7b3ae63ca0eb3486555dc27ed32c6e60 \
-	hello-world:latest@sha256:be0cd392e45be79ffeffa6b05338b98ebb16c87b255f48e297ec7f98e123905c
+#FROM base AS frozen-images
+#ARG DEBIAN_FRONTEND
+#RUN apt-get update && apt-get install -y --no-install-recommends \
+#	ca-certificates \
+#	jq \
+#	&& rm -rf /var/lib/apt/lists/*
+## Get useful and necessary Hub images so we can "docker load" locally instead of pulling
+#COPY contrib/download-frozen-image-v2.sh /
+#RUN /download-frozen-image-v2.sh /build \
+#	buildpack-deps:jessie@sha256:dd86dced7c9cd2a724e779730f0a53f93b7ef42228d4344b25ce9a42a1486251 \
+#	busybox:latest@sha256:bbc3a03235220b170ba48a157dd097dd1379299370e1ed99ce976df0355d24f0 \
+#	busybox:glibc@sha256:0b55a30394294ab23b9afd58fab94e61a923f5834fba7ddbae7f8e0c11ba85e6 \
+#	debian:jessie@sha256:287a20c5f73087ab406e6b364833e3fb7b3ae63ca0eb3486555dc27ed32c6e60 \
+#	hello-world:latest@sha256:be0cd392e45be79ffeffa6b05338b98ebb16c87b255f48e297ec7f98e123905c
 # See also ensureFrozenImagesLinux() in "integration-cli/fixtures_linux_daemon_test.go" (which needs to be updated when adding images to this list)
 
 FROM base AS cross-false
@@ -183,11 +182,11 @@ COPY hack/dockerfile/install/install.sh ./install.sh
 COPY hack/dockerfile/install/$INSTALL_BINARY_NAME.installer ./
 RUN PREFIX=/build ./install.sh $INSTALL_BINARY_NAME
 
-FROM base AS gotestsum
-ENV INSTALL_BINARY_NAME=gotestsum
-COPY hack/dockerfile/install/install.sh ./install.sh
-COPY hack/dockerfile/install/$INSTALL_BINARY_NAME.installer ./
-RUN PREFIX=/build ./install.sh $INSTALL_BINARY_NAME
+#FROM base AS gotestsum
+#ENV INSTALL_BINARY_NAME=gotestsum
+#COPY hack/dockerfile/install/install.sh ./install.sh
+#COPY hack/dockerfile/install/$INSTALL_BINARY_NAME.installer ./
+#RUN PREFIX=/build ./install.sh $INSTALL_BINARY_NAME
 
 FROM dev-base AS dockercli
 ENV INSTALL_BINARY_NAME=dockercli
@@ -265,9 +264,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN pip3 install yamllint==1.16.0
 
 COPY --from=swagger /build/swagger* /usr/local/bin/
-COPY --from=frozen-images /build/ /docker-frozen-images
+#COPY --from=frozen-images /build/ /docker-frozen-images
 COPY --from=gometalinter /build/ /usr/local/bin/
-COPY --from=gotestsum /build/ /usr/local/bin/
+#COPY --from=gotestsum /build/ /usr/local/bin/
 COPY --from=tomlv /build/ /usr/local/bin/
 COPY --from=vndr /build/ /usr/local/bin/
 COPY --from=tini /build/ /usr/local/bin/

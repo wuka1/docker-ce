@@ -496,6 +496,7 @@ type serviceOptions struct {
 	credentialSpec  credentialSpecOpt
 	init            bool
 	stopSignal      string
+	privileged      bool
 	tty             bool
 	readOnly        bool
 	mounts          opts.MountOpt
@@ -646,6 +647,7 @@ func (options *serviceOptions) ToService(ctx context.Context, apiClient client.N
 				Groups:     options.groups.GetAll(),
 				StopSignal: options.stopSignal,
 				TTY:        options.tty,
+				Privileged: options.privileged,
 				ReadOnly:   options.readOnly,
 				Mounts:     options.mounts.Value(),
 				Init:       &options.init,
@@ -752,6 +754,9 @@ func addServiceFlags(flags *pflag.FlagSet, opts *serviceOptions, defaultFlagValu
 	}
 
 	addDetachFlag(flags, &opts.detach)
+	flags.BoolVar(&opts.privileged, flagPrivileged, false, "Give extended privileges to the service")
+	flags.SetAnnotation(flagPrivileged, "version", []string{"1.35"})
+
 	flags.BoolVarP(&opts.quiet, flagQuiet, "q", false, "Suppress progress output")
 
 	flags.StringVarP(&opts.workdir, flagWorkdir, "w", "", "Working directory inside the container")
@@ -912,6 +917,7 @@ const (
 	flagStopGracePeriod         = "stop-grace-period"
 	flagStopSignal              = "stop-signal"
 	flagTTY                     = "tty"
+	flagPrivileged              = "privileged"
 	flagUpdateDelay             = "update-delay"
 	flagUpdateFailureAction     = "update-failure-action"
 	flagUpdateMaxFailureRatio   = "update-max-failure-ratio"

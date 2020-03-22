@@ -356,6 +356,7 @@ func (c *containerConfig) hostConfig() *enginecontainer.HostConfig {
 	hc := &enginecontainer.HostConfig{
 		Resources:      c.resources(),
 		GroupAdd:       c.spec().Groups,
+		Privileged:     c.spec().Privileged,
 		PortBindings:   c.portBindings(),
 		Mounts:         c.mounts(),
 		ReadonlyRootfs: c.spec().ReadOnly,
